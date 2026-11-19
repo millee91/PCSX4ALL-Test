@@ -1741,12 +1741,11 @@ void psxBios__card_info(void) { // ab
 	switch (card_active_chan) 
 	{
 	case 0x00: case 0x01: case 0x02: case 0x03:
-		ret = Config.Mcd1[0] ? 0x2 : 0x8;
+		ret = (Config.McdSlot1 != -1) ? 0x2 : 0x8;
 		break;
 	case 0x10: case 0x11: case 0x12: case 0x13:
-		ret = Config.Mcd2[0] ? 0x2 : 0x8;
-		/* Required for Tenka */
-		if (Config.MemoryCardHack) ret = 0x8;
+		ret = (Config.McdSlot2 != -1) ? 0x2 : 0x8;
+		/* Memory-card slot enabled/disabled state is configured via McdSlot2. */
 		break;
 	default:
 #ifdef PSXBIOS_LOG

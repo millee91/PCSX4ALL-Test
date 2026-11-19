@@ -15,6 +15,8 @@ typedef uint32_t u32;
 typedef int32_t  s32;
 typedef uint64_t u64;
 typedef int64_t  s64;
+typedef uintptr_t uptr;
+typedef intptr_t  sptr;
 #include <stdlib.h>
 #include <math.h>
 #include <time.h>
