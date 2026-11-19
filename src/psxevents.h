@@ -66,7 +66,7 @@ enum psxEventNum {
 
 void psxEvqueueInit(void);
 void psxEvqueueInitFromFreeze(void);
-void psxEvqueueAdd(enum psxEventNum ev, u32 cycles_after);
+void psxEvqueueAdd(enum psxEventNum ev, uint32_t cycles_after);
 void psxEvqueueRemove(enum psxEventNum ev);
 void psxEvqueueDispatchAndRemoveFront(psxRegisters *pr);
 
