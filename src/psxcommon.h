@@ -136,6 +136,9 @@ typedef struct {
 	int8_t McdSlot1; /* mcd slot 1, -1=empty, 0=CdromId.1.mcr, otherwise mcd%03u.mcr */
 	int8_t McdSlot2; /* mcd slot 2, -1=empty, 0=CdromId.2.mcr, otherwise mcd%03u.mcr */
 	uint_fast8_t MemoryCardHack; /* legacy per-game slot-2 override; 0 by default */
+	uint8_t Analog_Mode; /* R36SX: 0=digital, 1=analog, 2=dualshock */
+	char Mcd1[MAXPATHLEN]; /* R36SX persistent memory-card path */
+	char Mcd2[MAXPATHLEN]; /* R36SX persistent memory-card path */
 
 	//senquack - added Config.SpuIrq option from PCSX Rearmed/Reloaded:
 	uint_fast8_t SpuIrq; /* 1=SPU IRQ always enabled (needed for audio in some games) */
