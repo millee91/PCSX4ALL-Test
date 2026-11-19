@@ -1,0 +1,115 @@
+name: PCSX4ALL R36SX - baseline and memory profile
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/build-r36sx.yml'
+      - 'Makefile.sf3000'
+      - 'src/**'
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: MIPS 74Kc cross-compile
+    runs-on: ubuntu-22.04
+    timeout-minutes: 90
+
+    steps:
+      - name: Check out TreeFrogUI R36SX changes
+        uses: actions/checkout@v4
+        with:
+          path: overlay
+
+      - name: Check out complete PCSX4ALL source tree
+        uses: actions/checkout@v4
+        with:
+          repository: gameblabla/pcsx4all_rs97_rg350
+          ref: master
+          path: base
+
+      - name: Assemble PCSX4ALL source
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p build-src
+          rsync -a --exclude='.git' base/ build-src/
+          rsync -a --exclude='.git' overlay/ build-src/
+          test -f build-src/src/recompiler/mips/recompiler.c
+          test -f build-src/src/port/common/cdrom_hacks.c
+          test -f build-src/src/port/sf3000/port.c
+          test -f build-src/src/r36sx_memprof.h
+          echo "PCSX4ALL source + R36SX overlay assembled"
+
+      - name: Install legacy compiler dependencies
+        shell: bash
+        run: |
+          sudo apt-get update -qq
+          sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -qq libtinfo5 libncurses5
+
+      - name: Download and relocate the SF3000 MIPS SDK
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$HOME/sf3000-work/sf3000toolchain"
+          curl --fail --location --retry 3 --retry-delay 5 \
+            --output "$RUNNER_TEMP/mips-sdk.tar.gz" \
+            "https://github.com/game-de-it/sf3000/releases/download/sf3000_toolchain_v0.1/mipsel-buildroot-linux-gnu_sdk-buildroot.tar.gz"
+          tar -xzf "$RUNNER_TEMP/mips-sdk.tar.gz" --no-same-owner \
+            -C "$HOME/sf3000-work/sf3000toolchain"
+          rm -f "$RUNNER_TEMP/mips-sdk.tar.gz"
+          SDK="$HOME/sf3000-work/sf3000toolchain/mipsel-buildroot-linux-gnu_sdk-buildroot"
+          if [ -f "$SDK/relocate-sdk.sh" ]; then
+            (cd "$SDK" && bash ./relocate-sdk.sh)
+          fi
+          test -x "$SDK/opt/ext-toolchain/bin/mips-mti-linux-gnu-gcc"
+          test -d "$SDK/mipsel-buildroot-linux-gnu/sysroot"
+          "$SDK/opt/ext-toolchain/bin/mips-mti-linux-gnu-gcc" --version
+
+      - name: Build original R36SX binary (no instrumentation)
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd build-src
+          make -f Makefile.sf3000 -j2 2>&1 | tee ../build-normal.log
+          install -Dm755 pcsx4all ../out/normal/pcsx4all
+          file ../out/normal/pcsx4all
+          sha256sum ../out/normal/pcsx4all
+
+      - name: Upload baseline binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: pcsx4all-r36sx-baseline
+          path: out/normal/pcsx4all
+          if-no-files-found: error
+
+      - name: Build R36SX memory and GPU profile binary
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd build-src
+          make -f Makefile.sf3000 clean
+          make -f Makefile.sf3000 -j2 EXTRA_CFLAGS=-DDSPR2_PROFILE 2>&1 | tee ../build-profile.log
+          install -Dm755 pcsx4all ../out/profile/pcsx4all
+          file ../out/profile/pcsx4all
+          sha256sum ../out/profile/pcsx4all
+
+      - name: Upload profiler binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: pcsx4all-r36sx-memory-profile
+          path: out/profile/pcsx4all
+          if-no-files-found: error
+
+      - name: Upload build logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pcsx4all-build-diagnostics
+          path: |
+            build-normal.log
+            build-profile.log
+          if-no-files-found: ignore
