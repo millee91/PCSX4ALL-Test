@@ -33,7 +33,7 @@ CFLAGS  = $(C_ARCH) -Ofast -flto -fuse-linker-plugin -fno-strict-aliasing \
           -Wno-sign-compare -Wno-cast-align \
           -Isrc -Isrc/spu/$(SPU) -D$(SPU) -Isrc/gpu/$(GPU) \
           -Isrc/port/$(PORT) -Isrc/port/$(PORT)/SDL \
-          -Isrc/plugin_lib -Isrc/port/common \
+          -Isrc/plugin_lib -Isrc/port/common -Isrc/external_lib \
           -DXA_HACK \
           -DINLINE="static __inline__" -Dasm="__asm__ __volatile__" \
           -DMCD1_FILE=$(MCD1_FILE) -DMCD2_FILE=$(MCD2_FILE) \
@@ -57,7 +57,7 @@ LDFLAGS = -mips32r2 -mhard-float -mfp32 -EL \
           -flto -fuse-linker-plugin \
           -Wl,-O1 -Wl,--as-needed -Wl,--gc-sections
 
-OBJDIRS = obj obj/gpu obj/gpu/$(GPU) obj/gpu/gpulib obj/spu obj/spu/$(SPU) \
+OBJDIRS = obj obj/external_lib obj/gpu obj/gpu/$(GPU) obj/gpu/gpulib obj/spu obj/spu/$(SPU) \
           obj/recompiler obj/recompiler/$(RECOMPILER) \
           obj/port obj/port/$(PORT) \
           obj/plugin_lib obj/port/common
@@ -90,6 +90,8 @@ OBJS += obj/recompiler/mips/recompiler.o \
         obj/recompiler/mips/mem_mapping.o \
         obj/recompiler/mips/mips_codegen.o \
         obj/recompiler/mips/mips_disasm.o
+
+OBJS += obj/external_lib/ioapi.o obj/external_lib/unzip.o
 
 OBJS += obj/port/sf3000/tf_audio_queue.o
 
