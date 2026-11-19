@@ -20,6 +20,7 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <sys/time.h>
+#include "r36sx_memprof.h"
 
 #define PROF_DUMP_FRAMES 120
 
@@ -132,6 +133,7 @@ extern uint32_t g_prof_cc_last;     /* CC at previous video_flip            */
               _fr_ms > 0 ? 1000.0 / _fr_ms : 0.0, \
               (double)g_prof_calls / g_prof_frames, \
               (double)g_prof_audio_calls / g_prof_frames); \
+      r36sx_memprof_dump(); \
       g_prof_gpu_us = g_prof_present_us = g_prof_window_us = g_prof_calls = 0; \
       g_prof_audio_us = g_prof_audio_calls = 0; \
       g_prof_gte_cc = g_prof_gte_calls = g_prof_frame_cc = 0; \
