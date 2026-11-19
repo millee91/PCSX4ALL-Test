@@ -54,6 +54,8 @@ unsigned get_ticks(void);
 void wait_ticks(unsigned s);
 void pad_update(void);
 uint16_t pad_read(int num);
+const char *bios_file_get(void);
+int trigger_rumble(uint8_t low, uint8_t high);
 
 void video_flip(void);
 void video_clear(void);

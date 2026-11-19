@@ -52,6 +52,22 @@
 
 static void plog(const char *msg);
 
+/* The SF3000/R36SX frontend chooses the BIOS before psxMemInit().
+ * The base PSX memory loader calls this accessor for that selection. */
+const char *bios_file_get(void)
+{
+    return Config.Bios;
+}
+
+/* R36SX does not expose a rumble output through this frontend.
+ * The PS1 PAD plugin may request one; report it unsupported. */
+int trigger_rumble(uint8_t low, uint8_t high)
+{
+    (void)low;
+    (void)high;
+    return 0;
+}
+
 #ifdef DSPR2_PROFILE
 static int profile_read_one_line(const char *path, char *out, size_t out_size) {
     FILE *f = fopen(path, "r");
