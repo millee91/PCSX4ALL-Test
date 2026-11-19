@@ -1745,7 +1745,8 @@ void psxBios__card_info(void) { // ab
 		break;
 	case 0x10: case 0x11: case 0x12: case 0x13:
 		ret = (Config.McdSlot2 != -1) ? 0x2 : 0x8;
-		/* Memory-card slot enabled/disabled state is configured via McdSlot2. */
+		/* Tenka compatibility override (off by default). */
+		if (Config.MemoryCardHack) ret = 0x8;
 		break;
 	default:
 #ifdef PSXBIOS_LOG
